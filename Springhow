@@ -1,0 +1,120 @@
+Skip to content
+SpringHow
+SpringHow
+
+🏠 ❯ Spring Framework ❯ Shell Scripts to start and Stop Spring Boot Applications.
+Shell Scripts to start and Stop Spring Boot Applications.
+
+Raja AnbazhaganApril 5, 2021
+SPRING BOOT
+In this post, We will learn about start and stop shell scripts to run Spring Boot applications.
+
+Spring boot applications are easier to build and run. However, there is one small problem. Most of the developers still struggle when it comes to running, stopping and starting the application in production servers. The traditional applications were deployed on a web container like tomcat which came with a startup.sh and shutdown.sh script. However, this is not available out of the box with spring boot. This article helps you create a simple start and stop script for your spring boot web application.
+
+Start Script (startup.sh)
+The startup script for Spring Boot is simple and straightforward. Let’s take our hello-world application.
+
+#!/bin/bash
+nohup java -jar /path/to/app/hello-world.jar > /path/to/log.txt 2>&1 &
+echo $! > /path/to/app/pid.file
+Code language: Bash (bash)
+To break it down,
+
+java -jar /path/to/app/hello-world.jar initializes the application.
+> /path/to/log.txt redirects any anything written to STDOUT into the file /path/to/log.txt.
+2>&1 redirects all errors printed on STDERR to STDOUT. This way all the logs will go to STDOUT which is already redirected to /path/to/log.txt
+& at the end makes the application run in the background.
+echo $! will print the PID of the last command
+The PID is then written to a file using > /path/to/app/pid.file
+nohup lets the java process run in the background even after the user is logged out.
+nohup may leave a nohup.out file in working directory when the STDOUT and STDERR is not redirected properly. If that’s not what you want, You may want to use disown command to kick-start the script. A sample use case would be disown startup.sh &. But I dislike the way of calling a script with another command.
+
+Stop Script (shutdown.sh)
+Comparing to what we have written in the start script, the stop script is pretty simple.
+
+#!/bin/bash
+kill $(cat /path/to/app/pid.file)
+Code language: Bash (bash)
+The shutdown script makes use of the PID file created by the startup script. This allows us to locate and kill the exact process we spawned earlier. The script is pretty simple, and I believe this doesn’t need any explanation.
+
+stop and start (restart.sh)
+I know that i’m overkilling the topic here. But for the sake of completeness, Here is your restart.sh.
+
+#!/bin/bash
+. /path/to/shutdown.sh
+. /path/to/startup.sh
+Code language: Bash (bash)
+stop and start over SSH
+You can stop and start your application straight from your local machines if you have a bash client using the following command. I personally use this method most of the time to restart my applications hosted on my servers.
+
+sshpass -p password ssh userid@yourserver '/path/to/restart.sh'
+Code language: Bash (bash)
+Figure this one out yourself.
+
+There are few points to note though.
+
+Do not mix the name of the application jar files and paths. Always use canonical paths so its less confusing.
+Do not mix the name of the PID files.
+Your unix login may need necessary permissions to run few of the commands.
+There may be parameters, active profiles and JVM arguments specific to your application. Make sure you configure them in the script.
+Conclusion
+To conclude, We learned how to write startup.sh, shutdown.sh and restart.sh to manage spring boot application process. If you feel like it, you can learn more about converting the application into WAR file so that you can manage the application via the application server itself.
+
+Post navigation
+PREVIOUS
+Spring Boot Starters
+NEXT
+How to convert Spring Boot JAR to WAR?
+Similar Posts
+Custom Form Login in Spring Security
+Updated onMarch 12, 2021Security, Spring Boot
+0 Comments
+10 Reasons Why You should use Spring Boot.
+Updated onApril 4, 2021Spring Boot
+0 Comments
+Spring Boot and Zipkin for Distributed Tracing
+Updated onMarch 12, 2021Spring Boot
+0 Comments
+Spring Boot Health Endpoint
+Updated onMarch 12, 2021Spring Boot
+0 Comments
+Install and Run Spring Boot Linux Service Guide
+Updated onMarch 25, 2021Spring Boot
+1 Comment
+Spring Boot Banner – Complete Guide
+Updated onApril 18, 2021Spring Boot
+0 Comments
+Leave a Reply
+Your email address will not be published. Required fields are marked *
+
+Comment *
+
+Name *
+
+Email *
+
+Save my name, email, and website in this browser for the next time I comment.
+
+
+Search for:
+RECENT POSTS
+SpringApplication Class in spring Boot
+Failure Analyzers in Spring Boot and How they Work
+Understanding Lazy Initialization in Spring Boot
+Changing Default Port Number in Spring Boot
+10 Reasons Why You should use Spring Boot.
+Setter Dependency Injection in Spring Framework
+Constructor dependency injection in Spring Framework
+Send HTML emails with FreeMarker Templates – Spring Boot
+Introduction to FreeMarker Templates with Spring Boot
+Show SQL from Spring Data JPA/hibernate in Spring Boot
+CATEGORIES
+AMQP (1)
+Caching (3)
+RESTFul (5)
+Security (7)
+Session (3)
+Spring Boot (54)
+Spring Framework (15)
+Thymeleaf (9)
+© 2021 SpringHow
